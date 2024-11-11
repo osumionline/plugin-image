@@ -4,6 +4,8 @@ namespace Osumi\OsumiFramework\Plugins;
 
 use \GdImage;
 use \Exception;
+use \Imagick;
+use \ImagickException;
 use Osumi\OsumiFramework\Tools\OTools;
 
 /**
@@ -312,5 +314,43 @@ class OImage {
 			$rotation = imagerotate($source, $degrees, 0);
 			$this->image = $rotation;
 		}
+	}
+
+	/**
+	 * Function to convert a PDF file into image files (one per page)
+	 *
+	 * @param string $pdf_path Path of the PDF file
+	 *
+	 * @param string $output_directory Path where generated images should be stored
+	 *
+	 * @param int $resolution Resolution of the generated images, defaults to 300
+	 *
+	 * @param int $jpg_quality Quality of the generated images (0-100), defaults to 90
+	 *
+	 * @return array List of generated images
+	 */
+	public static function convertPdfToJpg(string $pdf_path, string $output_directory, int $resolution = 300, int $jpg_quality = 90): array {
+    // Check if output directory exists
+    if (!file_exists($output_directory)) {
+        mkdir($output_directory, 0777, true);
+    }
+
+    $output_path = $output_directory . '/' . pathinfo($pdf_path, PATHINFO_FILENAME) . '_%d.jpg';
+
+    // Construct the Ghostscript command
+    $command = sprintf(
+        'gs -dNOPAUSE -sDEVICE=jpeg -r' . $resolution . ' -dJPEGQ=' . $jpg_quality . ' -dBATCH -sOutputFile=%s %s',
+        escapeshellarg($output_path),
+        escapeshellarg($pdf_path)
+    );
+
+    // Execute the command
+    exec($command, $output, $return_code);
+
+    if ($return_code !== 0) {
+        throw new Exception('Error converting PDF using Ghostscript');
+    }
+
+    return glob($output_directory . '/' . pathinfo($pdf_path, PATHINFO_FILENAME) . '_*.jpg');
 	}
 }
