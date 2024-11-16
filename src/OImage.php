@@ -329,28 +329,42 @@ class OImage {
 	 *
 	 * @return array List of generated images
 	 */
-	public static function convertPdfToJpg(string $pdf_path, string $output_directory, int $resolution = 300, int $jpg_quality = 90): array {
-    // Check if output directory exists
-    if (!file_exists($output_directory)) {
-        mkdir($output_directory, 0777, true);
-    }
+	 public static function convertPdfToJpg(string $pdf_path, string $output_directory, int $resolution = 300, int $jpg_quality = 90): array {
+ 		// Check if output directory exists
+ 		if (!file_exists($output_directory)) {
+ 			mkdir($output_directory, 0777, true);
+ 		}
 
-    $output_path = $output_directory . '/' . pathinfo($pdf_path, PATHINFO_FILENAME) . '_%d.jpg';
+ 		// Detect the operating system and normalize paths
+ 		if (PHP_OS_FAMILY === 'Windows') {
+ 			// Convert to Windows-style paths (backslashes)
+ 			$pdf_path = str_replace('/', '\\', $pdf_path);
+ 			$output_directory = str_replace('/', '\\', $output_directory);
+ 			$output_path = $output_directory . '\\' . pathinfo($pdf_path, PATHINFO_FILENAME) . '_%d.jpg';
+ 		}
+ 		else {
+ 			// Convert to UNIX-style paths (slashes)
+ 			$pdf_path = str_replace('\\', '/', $pdf_path);
+ 			$output_directory = str_replace('\\', '/', $output_directory);
+ 			$output_path = $output_directory . '/' . pathinfo($pdf_path, PATHINFO_FILENAME) . '_%d.jpg';
+ 		}
 
-    // Construct the Ghostscript command
-    $command = sprintf(
-        'gs -dNOPAUSE -sDEVICE=jpeg -r' . $resolution . ' -dJPEGQ=' . $jpg_quality . ' -dBATCH -sOutputFile=%s %s',
-        escapeshellarg($output_path),
-        escapeshellarg($pdf_path)
-    );
+ 		// Construct the Ghostscript command
+ 		$command = sprintf(
+ 			'gs -dNOPAUSE -sDEVICE=jpeg -r%d -dJPEGQ=%d -dBATCH -sOutputFile=%s %s',
+ 			$resolution,
+ 			$jpg_quality,
+ 			$output_path,
+ 			$pdf_path
+ 		);
 
-    // Execute the command
-    exec($command, $output, $return_code);
+ 		// Execute the command
+ 		exec($command . ' 2>&1', $output, $return_code);
 
-    if ($return_code !== 0) {
-        throw new Exception('Error converting PDF using Ghostscript');
-    }
+ 		if ($return_code !== 0) {
+ 			throw new Exception("Error converting PDF using Ghostscript: {$command}\n" . var_export($output, true));
+ 		}
 
-    return glob($output_directory . '/' . pathinfo($pdf_path, PATHINFO_FILENAME) . '_*.jpg');
-	}
+ 		return glob($output_directory . '/' . pathinfo($pdf_path, PATHINFO_FILENAME) . '_*.jpg');
+ 	}
 }

@@ -1,7 +1,7 @@
 {
   "name": "osumionline/plugin-image",
   "description": "Plugin OImage para Osumi Framework",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "type": "library",
   "license": "MIT",
   "autoload": {
