@@ -11,7 +11,7 @@ $image->load('/path/to/image.jpg'); // Permite archivos JPG, PNG, GIF y WEBP
 // Guardar una imagen
 // Permite indicar la ruta del nuevo archivo, el formato de imagen, el ratio de compresión y los permisos del nuevo archivo
 // Por defecto el formato de imagen generado es JPG y el ratio de compresión es 75
-$image->save('/path/to/new_image.webp', IMAGETYPE_WEBP, 100, 100);
+$image->save('/path/to/new_image.avif', IMAGETYPE_AVIF, 100, 100);
 
 // Obtener la extensión de la representación en Base64 de una imagen
 $ext = $image->getImageExtension('data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...'); // Devuelve "png"

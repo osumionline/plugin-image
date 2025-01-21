@@ -104,9 +104,11 @@ class OImage {
 				break;
 				case IMAGETYPE_WEBP: { $this->image = imagecreatefromwebp($filename); }
 				break;
+				case IMAGETYPE_AVIF: { $this->image = imagecreatefromavif($filename); }
+				break;
 			}
 
-			if ($this->image_type === IMAGETYPE_PNG || $this->image_type === IMAGETYPE_WEBP) {
+			if (in_array($this->image_type, [IMAGETYPE_PNG, IMAGETYPE_WEBP, IMAGETYPE_AVIF])) {
 				imagepalettetotruecolor($this->image);
 				imagealphablending($this->image, true);
 				imagesavealpha($this->image, true);
@@ -151,6 +153,8 @@ class OImage {
 			break;
 			case IMAGETYPE_WEBP: { imagewebp($this->image, $filename); }
 			break;
+			case IMAGETYPE_AVIF: { imageavif($this->image, $filename); }
+			break;
 		}
 		if (!is_null($permissions)) {
 			chmod($filename, $permissions);
@@ -176,6 +180,8 @@ class OImage {
 			case IMAGETYPE_PNG: {  imagepng($this->image);  }
 			break;
 			case IMAGETYPE_WEBP: { imagewebp($this->image); }
+			break;
+			case IMAGETYPE_AVIF: { imageavif($this->image); }
 			break;
 		}
 	}
@@ -266,7 +272,7 @@ class OImage {
 			throw new Exception($this->error_messages['FILE_NOT_LOADED']);
 		}
 		$new_image = imagecreatetruecolor($width, $height);
-		if ($this->image_type === IMAGETYPE_PNG || $this->image_type === IMAGETYPE_WEBP) {
+		if (in_array($this->image_type, [IMAGETYPE_PNG, IMAGETYPE_WEBP, IMAGETYPE_AVIF])) {
 			imagealphablending($new_image, false);
 			imagesavealpha($new_image, true);
 			$transparent = imagecolorallocatealpha($new_image, 255, 255, 255, 127);
@@ -286,6 +292,17 @@ class OImage {
 	public function rotate(int $degrees): void {
 		if (is_null($this->image)) {
 			throw new Exception($this->error_messages['FILE_NOT_LOADED']);
+		}
+		if ($this->image_type === IMAGETYPE_AVIF) {
+			$source = imagecreatefromavif($this->filename);
+			imagealphablending($source, false);
+			imagesavealpha($source, true);
+
+			$rotation = imagerotate($source, $degrees, imageColorAllocateAlpha($source, 0, 0, 0, 127));
+			imagealphablending($rotation, false);
+			imagesavealpha($rotation, true);
+
+			$this->image = $rotation;
 		}
 		if ($this->image_type === IMAGETYPE_WEBP) {
 			$source = imagecreatefromwebp($this->filename);
