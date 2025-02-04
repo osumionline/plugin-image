@@ -136,11 +136,11 @@ class OImage {
 	 *
 	 * @param int $compression Compression rate of the new file
 	 *
-	 * @param int $permissions Permissions of the new file
+	 * @param int | null $permissions Permissions of the new file
 	 *
 	 * @return void
 	 */
-	public function save(string $filename, int $image_type=IMAGETYPE_JPEG, int $compression=75, int $permissions=null): void {
+	public function save(string $filename, int $image_type=IMAGETYPE_JPEG, int $compression=75, int | null $permissions = null): void {
 		if (is_null($this->image)) {
 			throw new Exception($this->error_messages['FILE_NOT_LOADED']);
 		}
